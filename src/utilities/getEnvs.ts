@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 config();
 
 const { env } = process;
-const { TOTAL_TELCOS, TELCOS } = env;
+const { TOTAL_TELCOS, TELCOS, DB_URL } = env;
 
 export const getTelcos = JSON.parse(TELCOS);
 
@@ -17,3 +17,5 @@ export const getTelcosNumbers = () => {
   }
   return telcoNumbers;
 };
+
+export const getDbUrl = () => DB_URL;

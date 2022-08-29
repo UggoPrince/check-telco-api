@@ -1,15 +1,39 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import {
   getTelcos,
   getTelcosNumbers,
   getTotalTelcos,
 } from 'src/utilities/getEnvs';
+import { CreateTelcoDto } from './dto/create-telco.dto';
+import { Telco, TelcoDocument } from './shemas/telco.shema';
 
 @Injectable()
 export class TelcosService {
   private readonly telCoNumbers: any[] = getTelcosNumbers();
   private readonly totalTelcos: number = getTotalTelcos;
   private readonly telcos: object = getTelcos;
+
+  constructor(
+    @InjectModel(Telco.name) private readonly telcoModel: Model<TelcoDocument>,
+  ) {}
+
+  create(createTelcoDto: CreateTelcoDto): Promise<Telco> {
+    return new this.telcoModel(createTelcoDto).save();
+  }
+
+  searchTelcos(text: string) {
+    return this.telcoModel
+      .aggregate([
+        {
+          $search: {
+            autocomplete: { query: text, path: 'phoneNumber' },
+          },
+        },
+      ])
+      .exec();
+  }
 
   getTelco(phoneNumber: string) {
     const p = phoneNumber.length;
