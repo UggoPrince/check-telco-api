@@ -5,7 +5,7 @@ import {
   IsMobilePhone,
 } from 'class-validator';
 
-export class TelcoDto {
+export class PhoneNumberDto {
   @IsString()
   @IsNotEmpty()
   @IsPhoneNumber('NG')
