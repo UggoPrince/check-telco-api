@@ -31,6 +31,9 @@ export class TelcosService {
             autocomplete: { query: text, path: 'phoneNumber' },
           },
         },
+        {
+          $group: { _id: { phoneNumber: '$phoneNumber' } },
+        },
       ])
       .exec();
   }
