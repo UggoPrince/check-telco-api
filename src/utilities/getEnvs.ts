@@ -3,7 +3,8 @@ import { config } from 'dotenv';
 config();
 
 const { env } = process;
-const { TOTAL_TELCOS, TELCOS, DB_URL } = env;
+const { TOTAL_TELCOS, TELCOS, DB_URL, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD } =
+  env;
 
 export const getTelcos = JSON.parse(TELCOS);
 
@@ -19,3 +20,9 @@ export const getTelcosNumbers = () => {
 };
 
 export const getDbUrl = () => DB_URL;
+
+export const getRedisConfigs = () => ({
+  host: REDIS_HOST,
+  port: parseInt(REDIS_PORT, 10),
+  password: REDIS_PASSWORD,
+});
