@@ -38,6 +38,25 @@ export class TelcosService {
       .exec();
   }
 
+  getTelcoSearchHistory(name: string) {
+    return this.telcoModel
+      .aggregate([
+        {
+          $match: { name },
+        },
+        {
+          $group: {
+            _id: { $month: '$createdAt' },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ])
+      .exec();
+  }
+
   getTelco(phoneNumber: string) {
     const p = phoneNumber.length;
     let telcoPrefix = '';

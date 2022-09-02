@@ -1,3 +1,4 @@
+import { InjectQueue } from '@nestjs/bull';
 import {
   Body,
   Controller,
@@ -5,8 +6,10 @@ import {
   HttpCode,
   Param,
   Post,
+  Query,
   Res,
 } from '@nestjs/common';
+import { Queue } from 'bull';
 import { Response } from 'express';
 import { success } from 'src/utilities/responses';
 import { PhoneNumberDto } from './dto/phone-number.dto';
@@ -14,15 +17,32 @@ import { TelcosService } from './telcos.service';
 
 @Controller('telco')
 export class TelcosController {
-  constructor(private readonly telcosService: TelcosService) {}
+  constructor(
+    private readonly telcosService: TelcosService,
+    @InjectQueue('telco') private readonly telcoQueue: Queue,
+  ) {}
   @Post('')
   @HttpCode(200)
-  async determineTelco(@Body() body: PhoneNumberDto, @Res() res: Response) {
+  async determineTelco(
+    @Body() body: PhoneNumberDto,
+    @Res() res: Response,
+    @Query('history') history: boolean,
+  ) {
     const { phoneNumber } = body;
     const telcoName = this.telcosService.getTelco(phoneNumber);
-    const telco = { name: telcoName, phoneNumber };
-    this.telcosService.create(telco);
-    return success(res, 200, 'Success', { telco: telcoName });
+    const data: any = { telco: telcoName };
+    if (telcoName !== null) {
+      const telco = { name: telcoName, phoneNumber };
+      this.telcoQueue.add('saveTelco', telco);
+      if (history) {
+        const result = await this.telcosService.getTelcoSearchHistory(
+          telcoName,
+        );
+        data.history = result;
+        console.log(result);
+      }
+    }
+    return success(res, 200, 'Success', data);
   }
 
   @Get('auto-complete/:number')
